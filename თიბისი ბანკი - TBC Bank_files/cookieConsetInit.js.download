@@ -1,0 +1,172 @@
+// obtain cookieconsent plugin
+var cc = initCookieConsent();
+
+var locatedOutsideGeorgia = false;
+var cookie_name = 'cc_cookie';
+
+try {
+	locatedOutsideGeorgia = Intl.DateTimeFormat().resolvedOptions().timeZone !== 'Asia/Tbilisi';
+} catch(e) {
+ // do nothing
+}
+
+if (!locatedOutsideGeorgia) { // do not show cookie popup for georgia, considered as automatic agreement
+		var _setCookie = function(name, value) {
+
+			var date = new Date();
+			date.setTime(date.getTime() + (1000 * ( 182 * 24 * 60 * 60)));
+			var expires = "; expires=" + date.toUTCString();
+
+			var cookieStr = name + "=" + (value || "") + expires + "; Path=/;";
+			cookieStr += " SameSite=Lax;";
+
+			// assures cookie works with localhost (=> don't specify domain if on localhost)
+			if(location.hostname.indexOf(".") > -1){
+					cookieStr += " Domain=" + location.hostname + ";";
+			}
+
+			if(location.protocol === "https:") {
+					cookieStr += " Secure;";
+			}
+
+			document.cookie = cookieStr;
+	}
+	_setCookie(cookie_name, '{"level": ["necessary","analytics","preferences"]}')
+}
+
+// run plugin with config object
+cc.run({
+	autorun : !!locatedOutsideGeorgia, 
+	delay : 1000,
+	current_lang : 'ka',
+	auto_language : false,
+	autoclear_cookies : true,
+	cookie_expiration : 365,
+	cookie_name,
+	theme_css: window.pathThemeCss + '/cookieconsent.css',
+	force_consent: false,
+	    /* Manage existing <scripts> tags (check readme.md) */
+    page_scripts: true,                         // default: false (by default don't manage existing script tags)
+	gui_options: {
+		consent_modal : {
+				layout : 'bar',               // box/cloud/bar
+				position : 'bottom center',     // bottom/top + left/right/center
+		},
+	},
+		languages : {
+            'ka' : {
+                consent_modal : {
+                         title :  "ქუქი-ფაილების განახლებული პოლიტიკა",
+                         description :  ' ჩვენ ვიყენებთ ქუქი-ფაილებს პერსონალიზაციისთვის, რათა გავაუმჯობესოთ კონტენტი თუ სერვისები და უზრუნველვყოთ მომხმარებლების უსაფრთხოება. ქუქი-ფაილების განახლებული პირობებით სარგებლობისთვის, დარჩით საიტზე ჩვეულ რეჟიმში. მეტი ინფორმაციის მისაღებად ან პარამეტრების შესაცვლელად, იხილეთ „ქუქი-ფაილების პოლიტიკა“. არჩეული პარამეტრების შეცვლა შეგიძლიათ ნებისმიერ დროს. <button type="button" data-cc="c-settings" class="cc-link">არჩევა</button>',
+                         primary_btn: {
+                                  text: 'დადასტურება',
+                                  role: 'accept_all', //'accept_selected' or 'accept_all'
+                         },
+                         secondary_btn: {
+                                  text : 'გაუქმება',
+                                  role : 'accept_necessary'                           //'settings' or 'accept_necessary'
+                         }
+                },
+                settings_modal : {
+                         title : '<div>მონაცემთა პარამეტრები</div>',
+                         save_settings_btn : "პარამეტრების შენახვა",
+                         accept_all_btn : "ყველა პარამეტრის გააქტიურება",
+                         close_btn_label: "დახურვა",
+                         cookie_table_headers : [
+                                  {col1: "სახელი" },
+                                  {col2: "დომენი" },
+                                  {col3: "მოქმედების ვადა"},
+                                  {col4: "აღწერა" },
+                                  {col5: "ტიპი" }
+                         ],
+                         blocks : [
+                                  {
+                                          title : "ქუქი-ფაილების გამოყენება",
+                                          description: 'ჩვენ ვიყენებთ ქუქი-ფაილებს, რათა უზრუნველვყოთ საიტის გამართულად მუშაობა და გავაუმჯობესოთ თქვენი ონლაინ გამოცდილება. არჩეული პარამეტრების შეცვლა ნებისმიერ დროს შეგიძლიათ. ქუქი-ფაილებთან ან სხვა კონფიდენციალურ პარამეტრებთან დაკავშირებით მეტი ინფორმაციის მისაღებად, იხილეთ <a href="' + window.URLHome + '/cookies' + '" class="cc-link">უსაფრთხოების პოლიტიკა</a>.'
+                                  },{
+                                          title : 'აუცილებელი ქუქი-ფაილები',
+                                          description: 'ეს ქუქი-ფაილები აუცილებელია საიტის გამართულად მუშაობისთვის. მათ გარეშე საიტი ვერ შეძლებს სრულყოფილად ფუნქციონირებას.',
+                                          toggle : {
+                                                   value : 'necessary',
+                                                   enabled : true,
+                                                   readonly: true                                                         //cookie categories with readonly=true are all treated as "necessary cookies"
+                                          }
+                                  // },{
+                                  //       title : "Preferences cookies",
+                                  //       description: 'These cookies allow the website to remember the choices you have made in the past',
+                                  //       toggle : {
+                                  //               value : 'preferences',    //there are no default categories => you specify them
+                                  //               enabled : false,
+                                  //               readonly: false
+                                  //       }
+                                  },{
+                                          title : "ანალიტიკური ქუქი-ფაილები",
+                                          description: 'ეს ქუქი-ფაილები გვაწვდის ინფორმაციას იმის შესახებ, თუ როგორ იყენებთ საიტს, რომელ გვერდებს ეწვიეთ და რომელ ბმულებზე დააკლიკეთ. ყველა ინფორმაცია ანონიმურია და ვერ იქნება გამოყენებული თქვენი ვინაობის დასადგენად.',
+                                          toggle : {
+                                                   value : 'analytics',
+                                                   enabled : false,
+                                                   readonly: false
+                                          },
+                                  },
+                         ]
+                },
+       },
+		'en' : {	
+			consent_modal : {
+				title :  "Updated cookie policy",
+				description :  'We use cookies to help personalise and improve content, services and provide a safer experience. To accept cookies continue browsing as normal. Or go to the cookies policy for more information and preferences. You can review your cookie controls at any time. <button type="button" data-cc="c-settings" class="cc-link">Let me choose</button>',
+				primary_btn: {
+					text: 'Accept',
+					role: 'accept_all'				//'accept_selected' or 'accept_all'
+				},
+				secondary_btn: {
+					text : 'Reject',
+					role : 'accept_necessary'				//'settings' or 'accept_necessary'
+				}
+			},
+			settings_modal : {
+				title : '<div>Data preferencies</div>',
+				save_settings_btn : "Save settings",
+				accept_all_btn : "Accept all",
+				close_btn_label: "Close",
+				cookie_table_headers : [
+					{col1: "Name" }, 
+					{col2: "Domain" }, 
+					{col3: "Expiration" }, 
+					{col4: "Description" }, 
+					{col5: "Type" }
+				],
+				blocks : [
+					{
+						title : "Cookie usage",
+						description: 'We use cookies to ensure the basic functionalities of the website and to enhance your online experience. You can choose for each category to opt-in/out whenever you want. For more details relative to cookies and other sensitive data, please read the full <a href="' + window.URLHome + '/cookies' + '" class="cc-link">privacy policy</a>.'
+					},{
+						title : "Strictly necessary cookies",
+						description: 'These cookies are essential for the proper functioning of this website. Without these cookies, the website would not work properly',
+						toggle : {
+							value : 'necessary',
+							enabled : true,
+							readonly: true							//cookie categories with readonly=true are all treated as "necessary cookies"
+						}
+					// },{
+					// 	title : "Preferences cookies",
+					// 	description: 'These cookies allow the website to remember the choices you have made in the past',
+					// 	toggle : {
+					// 		value : 'preferences',	//there are no default categories => you specify them
+					// 		enabled : false,
+					// 		readonly: false
+					// 	}
+					},{
+						title : "Analytics cookies",
+						description: 'These cookies collect information about how you use the website, which pages you visited and which links you clicked on. All of the data is anonymized and cannot be used to identify you',
+						toggle : {
+							value : 'analytics',
+							enabled : false,
+							readonly: false
+						},
+					},
+				]
+			},
+		}
+	}
+});

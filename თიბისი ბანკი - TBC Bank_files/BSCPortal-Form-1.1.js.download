@@ -1,0 +1,100 @@
+/**
+ * Form Validation Handler version 1.0.1.0
+ * 
+ * Library handling ajax call for java validation process
+ *  
+ */
+BSCPortal = window.BSCPortal || {};
+
+;(function(BSCPortal){
+	
+	var Form = {
+			options : {
+					// the id of an element for result html code 
+					targetId: "",
+					// the id of an element for positive scenario
+					finalTargetId: "",
+					resourceUrl : "",
+					formName : "",
+					additionalData : {}
+					
+			},
+
+			serializeArray : function(obj) {
+				  var str = [];
+				  for(var p in obj)
+				     str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+				  return str.join("&");
+			},
+	
+			runValidation : function (myObject) {
+				// overide this object with custom object
+				var customObject = $.extend(true, {}, this, myObject);
+				customObject.validate(customObject);
+			},
+			
+			validate: function (customObject) {
+				var form = $("#" + customObject.options.formName);
+				var formData = $("input, textarea, select", form).serialize();
+				var additionalData = customObject.options.additionalData;
+				var wholeData = "";
+				if (formData.length > 0) {
+					wholeData = formData + "&" + customObject.serializeArray(additionalData);
+				}
+			  	$.ajax({
+					type: "POST",
+					url: customObject.options.resourceUrl,
+					data: wholeData,
+					dataType: "html",
+					async: false,
+					beforeSend: function(){},
+			    	success: function(response) {
+			    		response = response.replace(/^\s+|\s+$/g,'');
+						if (response.length > 0) {
+				    		var targetElement = form;
+				    		if ($(response).find(".error-validation-field").length == 0 && $(response).find(".error-validation-msg").length == 0) {
+				    			if (customObject.options.finalTargetId != "") {
+				    				customObject.options.targetId = customObject.options.finalTargetId;
+					    		} 			
+				    		}
+				    		
+				    		if (customObject.options.targetId != "") {
+				    			targetElement = $("#" + customObject.options.targetId);
+				    		}
+				    		
+							$(targetElement).html(response);
+							
+							// run custom script
+							customObject.runCustomScript();
+				    		
+							if ($(response).find(".error-validation-field").length == 0 && $(response).find(".error-validation-msg").length == 0) {
+								//clearPreviousErrorMarks(form, "errMessagesCustom");
+								$(form).find("input, select, textarea").removeClass("error-validation-field");
+								customObject.runAfterValidation();
+							}
+							
+						} else {
+							customObject.runAfterValidation();
+						}
+						//BSCPortal.Utils.refreshWidgets();
+						//BSCPortal.Utils.hideLoading();
+			    		
+			       },
+			       error: function(e) {
+			    	   BSCPortal.Form.handleAjaxError();
+			       }
+			    });
+				
+		    },
+		    runCustomScript: function() {
+		    },
+		    runAfterValidation: function() {
+		    },
+		    handleAjaxError: function() {
+		    	alert("Error processing request!");
+		    }
+	};
+       
+BSCPortal.Form = Form;
+	
+})(BSCPortal);

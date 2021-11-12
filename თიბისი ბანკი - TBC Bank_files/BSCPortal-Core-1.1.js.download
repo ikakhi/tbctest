@@ -1,0 +1,262 @@
+BSCPortal = window.BSCPortal || {};
+
+;(function(BSCPortal){
+	
+		
+	var Utils = {
+			
+			timer: null,
+			
+			sayHello : function(){
+				alert("Hello!");
+			},
+	
+	        showLoading : function(){
+	        	timer = setTimeout(this.hideLoading,60000);
+	        	this.showLoadingNoTimeout();
+	        },
+	        
+	        showLoadingNoTimeout : function() {
+
+	        	document.getElementById('pageIsLoading').style.display = 'block'; // DOM3 (IE5, NS6) only
+	        	//document.getElementById('pageIsLoading-overlay').style.display = 'block'; // DOM3 (IE5, NS6) only
+
+	        	var winW = 0, winH = 0;
+	        	if (document.body && document.body.offsetWidth) {
+	        		winW = document.body.offsetWidth;
+	        		winH = document.body.offsetHeight;
+	        	}
+	        	if (document.compatMode=='CSS1Compat' &&
+	        	    document.documentElement &&
+	        	    document.documentElement.offsetWidth ) {
+	        		winW = document.documentElement.offsetWidth;
+	        		winH = document.documentElement.offsetHeight;
+	        	}
+	        	if (window.innerWidth && window.innerHeight) {
+	        		winW = window.innerWidth;
+	        		winH = window.innerHeight;
+	        	}
+	        	var loadingTable = document.getElementById('pageIsLoading-table');
+	        	//var loadingOverlay = document.getElementById('pageIsLoading-overlay');
+	        	loadingTable.style.width=winW-58+'px';
+	        	loadingTable.style.height=winH-58+'px';
+	        	
+	        	var pageIsLoading = document.getElementById('pageIsLoading');
+	        	
+	        	pageIsLoading.style.width=winW+'px';
+	        	pageIsLoading.style.height=winH+'px';
+	        	
+	        	
+	        	var scrollT = 0, scrollL = 0;
+	        	
+	        	if (document.documentElement && document.body) {
+	        		// some compatibility issues because of chrome. IE was suprisingly OK :), take bigger value
+	        		scrollT = (document.documentElement.scrollTop > document.body.scrollTop) ? document.documentElement.scrollTop : document.body.scrollTop;    
+	        		scrollL = (document.documentElement.scrollLeft > document.body.scrollLeft) ? document.documentElement.scrollLeft : document.body.scrollLeft;    
+	        	}
+	        	
+	        	loadingTable.style.top=scrollT+'px';
+	        	loadingTable.style.left=scrollL+'px';                        
+	        },
+	        
+	        hideLoadingNoWidgets : function() {
+              try {
+	        	document.getElementById('pageIsLoading').style.display = 'none'; // DOM3 (IE5, NS6) only
+	        	
+	        	$(".mainContentWrapper").css("visibility","visible");
+
+	        	var portletHeaderHelp = $(".portlet-header-help");
+	        	if (portletHeaderHelp.length) {
+	        		portletHeaderHelp.each( function () {
+	        			$(this).appendTo($(this).closest(".portlet-boundary").find(".portlet-topper h1"));
+	        		});
+	        	}
+	        	
+	        	clearTimeout(this.timer);
+              }catch(e){
+            	  return;
+              }
+	        	
+
+	        },
+	        
+	        hideLoading : function(){
+	        	
+	        	this.hideLoadingNoWidgets();
+	        	//this.refreshWidgets(document.body);
+	        },
+	        
+	        escapeHTML: function(text) {
+	        	return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+	        },
+
+	        isEmpty: function(str) {
+	            return (!str || 0 === str.length);
+	        },
+	        
+	        /**
+	         * 
+	         * @param portletId Id of portlet fo 
+	         * @param node DOM node of portlet element.
+	         */
+	        refreshWidgets : function(node){
+	        	
+	        	// if no node is defined make refresh over whole document 
+	        	if (node == undefined || node == "") {
+	        		node = document.body;
+	        	}
+	        	
+	        	var context = $(node);
+
+	        	var selectBoxWidget = context.find(".selectbox-widget");
+	        	if (selectBoxWidget.length) {
+	        		selectBoxWidget.selectBox("destroy");
+	        	 	selectBoxWidget.not(".autoComplete").selectBox();
+	        	 	selectBoxWidget.filter(".autoComplete").selectBox({readOnly: false});
+	        	}
+
+	        	var dynamicTableWidget = context.find(".dynamic-table");
+	        	if (dynamicTableWidget.length) {
+	        	 	dynamicTableWidget.dynamicTable("destroy");    
+	        	 	dynamicTableWidget.not(".fixedHeader-table").dynamicTable();    
+	        	 	dynamicTableWidget.filter(".fixedHeader-table").dynamicTable({fixedHeader: true});    
+	        	};
+
+	        	var accountSelectBoxWidget = context.find(".accounts-selectbox-widget-wrapper");
+	        	if (accountSelectBoxWidget.length) {
+	        	 	accountSelectBoxWidget.selectBoxA("destroy");
+	        	 	accountSelectBoxWidget.selectBoxA();
+	        	}
+
+	        	var littleDescription = context.find('[rel=littleDescription], .blocations-tooltip');
+	        	if (littleDescription.length) {
+	        	 	littleDescription.simpleTooltip("destroy");
+	        	 	littleDescription.simpleTooltip();
+	        	}
+
+	        	var littleTooltip = context.find('.portletHeadTooltip, [rel=tooltip]');
+	        	if (littleTooltip.length) {
+	        	 	littleTooltip.simpleTooltip("destroy");
+	        	 	littleTooltip.simpleTooltip({
+	        			type: 'littleTooltip',
+	        			my: 'left-6 bottom-6'
+	        	    });
+	        	}
+
+	        	var actionButtonMenu = context.find(".actionButton.withMenu");
+	        	if (actionButtonMenu.length) {
+	        	 	actionButtonMenu.simpleTooltip("destroy");
+	        	 	actionButtonMenu.simpleTooltip({
+						type: 'actionButtonMenu',
+						my: 'left top',
+						collision: 'flip',
+						at: 'right top'
+					});
+	        	}
+
+	        	// small fix for myMoney portlet - wrapping input fields cause problem with javascript selectors!
+	        	var simpleInputWidget = context.find("input.simpleInput-widget").not(".pfm input.simpleInput-widget");
+	        	
+	        	if (simpleInputWidget.length){
+	        		simpleInputWidget.simpleInput("destroy");
+	        		simpleInputWidget.simpleInput();
+
+	        		simpleInputWidget.maskedTextbox("destroy");
+	        		simpleInputWidget.filter(".switchLanguage").maskedTextbox({language: "$locale.getLanguage()"});
+	        		simpleInputWidget.filter(".fixedLanguageEn").maskedTextbox({language: "en", switchable: false});
+	        		simpleInputWidget.filter(".upperCase").maskedTextbox({uppercase: true, language: "", switchable: false});
+	        	}
+
+	        	var actionButtonWidget = context.find("input.actionButton");
+	        	if (actionButtonWidget.length) {
+	        		actionButtonWidget.actionButton('destroy');
+	        		actionButtonWidget.actionButton();
+	        	}
+
+	        	var inputDateWidget = context.find(".inputDate-input");
+	        	if (inputDateWidget.length){
+	        		inputDateWidget.inputDate("destroy");
+	        		inputDateWidget.inputDate();
+	        	}
+	        },
+	        
+	        // call close function from jquery.selectBox-2.0 library
+	        closeSelectBox: function(node) {
+	        	var context = $(node);
+	        	
+	        	$(context).undelegate(".selectbox-widget-wrapper","mouseleave");
+			   	$(context).delegate(".selectbox-widget-wrapper","mouseleave",function(){
+			    	$(this).prev("select").selectBox("close");
+			   	});
+	        },
+	        getBrowserInfo: function() {
+	            var ua = navigator.userAgent, tem,
+	            	M = ua.match(/(opera|chrome|android|safari|firefox|msie|trident|blackberry|bb10(?=\/))\/?\s*(\d+)/i) || []; 
+
+	            if (/trident/i.test(M[1])) {
+	                tem=/\brv[ :]+(\d+)/g.exec(ua) || [];
+	                return {
+	                	name: 'IE',
+	                	version: (tem[1] || '')
+	                };
+	            }
+	            
+	            if (M[1] === 'Chrome') {
+	                tem = ua.match(/\bOPR\/(\d+)/);
+	                if (tem != null) {
+	                	return {
+	                		name: 'Opera',
+	                		version: tem[1]
+	                	};
+	                }
+	            }
+	            
+	            if (M[1] === 'Safari') {
+		            if ((tem = ua.match(/(bb10|blackberry)/i)) != null) {
+		            	M.splice(1, 1, tem[0]);
+		            }
+	            }
+	            
+
+	            M = M[2] ? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+	            if ((tem=ua.match(/version\/(\d+)/i)) != null) {
+	            	M.splice(1, 1, tem[1]);
+	            }
+	            return {
+	            	name: M[0],
+	            	version: M[1]
+	            };
+	        },
+	        isSupportedBrowser: function(isMobile) {
+	        	var browser = Utils.getBrowserInfo();
+	        	switch (browser.name) {
+	        	case 'Chrome':
+	        		return true;
+	        	case 'Safari':
+	        		return isMobile ? browser.version >= 5 : browser.version >= 7; 
+	        	case 'Netscape':
+	        		return (browser.version.substring(0,1) >= 5 && browser.version.indexOf('iPad') > -1 ? true : false);
+        		case 'Firefox':
+        			return browser.version >= 35; 
+        		case 'Android':
+        			return browser.version >= 4; 
+        		case 'IE':
+        		case 'IE ':
+        		case 'MSIE':
+        			return browser.version >= 9;
+        		}
+	        	return false;
+	        },
+	        showUnsupportedMessage: function(message) {
+	        	var messageAlert = $('<div class="unsupportedMessageAlert"><div class="unsupportedMessageWrapper"><span class="unsupportedMessage"></span><div class="unsupportedMessageClose"></div></div></div>');
+	        	messageAlert.appendTo($('body'));
+	        	messageAlert.find('.unsupportedMessage').html(message);
+	        	messageAlert.on('click', '.unsupportedMessageClose', function() {
+	        		messageAlert.remove();
+	        	});
+	        }
+	};	
+	
+	BSCPortal.Utils = Utils;
+	
+})(BSCPortal);
