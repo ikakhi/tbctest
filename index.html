@@ -2,16 +2,25 @@
 <html>
 <body>
 
-<h2>Cookies For Medallia</h2>
+<h2>JavaScript URL For Medallia</h2>
 
-
-<p>Create a Cookie, assign a value to it, and display it:</p>
+<p>Create a variable, assign a value to it, and display it:</p>
 
 
 <script>
 
-document.cookie = "MyCookie1=tbcmortgage";
+location.href = 'https://tbctest-p2zez.ondigitalocean.app?customerId=5'
 
+
+</script>
+
+
+<button id="myButton" class="submit-button" >Home</button>
+
+<script type="text/javascript">
+    document.getElementById("myButton").onclick = function () {
+        location.href = "https://tbctest-p2zez.ondigitalocean.app?customerId=5";
+    };
 </script>
 
 <script type="text/javascript" src="https://resources.digital-cloud.medallia.eu/wdceu/179423/onsite/embed.js" async></script>
